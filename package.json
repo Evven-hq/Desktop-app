@@ -1,0 +1,14 @@
+{
+  "name": "evven-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:mac": "pake https://evven.xyz/desktop --name Evven --icon assets/evven-icon.png --targets app",
+    "build:windows": "pake https://evven.xyz/desktop --name Evven --icon assets/evven-icon.png --targets x64",
+    "build:linux:appimage": "pake https://evven.xyz/desktop --name Evven --icon assets/evven-icon.png --targets appimage",
+    "build:linux:deb": "pake https://evven.xyz/desktop --name Evven --icon assets/evven-icon.png --targets deb"
+  },
+  "devDependencies": {
+    "pake-cli": "^3.12.1"
+  }
+}
