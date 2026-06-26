@@ -1,0 +1,127 @@
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Pake
+        run: npm install
+
+      - name: Build macOS App
+        run: |
+          npx pake https://evven.xyz/desktop \
+            --name "Evven" \
+            --icon assets/evven-icon.png \
+            --targets app
+
+      - name: Create DMG
+        run: |
+          APP=$(find . -name "Evven.app" | head -n1)
+
+          hdiutil create \
+            -volname "Evven" \
+            -srcfolder "$APP" \
+            -ov \
+            -format UDZO \
+            Evven-${{ github.ref_name }}-macOS.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macOS
+          path: |
+            *.dmg
+            *.app
+
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Pake
+        run: npm install
+
+      - name: Build Windows
+        run: |
+          npx pake https://evven.xyz/desktop ^
+            --name Evven ^
+            --icon assets/evven-icon.png ^
+            --targets x64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            **/*.exe
+            **/*.msi
+
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Install Pake
+        run: npm install
+
+      - name: Build AppImage
+        run: |
+          npx pake https://evven.xyz/desktop \
+            --name Evven \
+            --icon assets/evven-icon.png \
+            --targets appimage
+
+      - name: Build DEB
+        run: |
+          npx pake https://evven.xyz/desktop \
+            --name Evven \
+            --icon assets/evven-icon.png \
+            --targets deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            **/*.AppImage
+            **/*.deb
